@@ -1,0 +1,20 @@
+{
+    "name": "ds_config_json",
+    "properties": {
+        "description": "Ingestion control file: which sources to load and where.",
+        "linkedServiceName": {
+            "referenceName": "ls_adls_gen2",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "Json",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "fileName": "ingestion_config.json",
+                "fileSystem": "config"
+            }
+        },
+        "schema": {}
+    }
+}

@@ -1,0 +1,61 @@
+provider_npi,provider_name,specialty,provider_type,city,state,network_status
+1810790724,Dr. Carlos Jackson,Dermatology,SPECIALIST,San Diego,CA,IN
+1315870923,Dr. Joseph Garcia,Cardiology,SPECIALIST,San Diego,CA,IN
+1789285590,Dr. Thomas Brown,Pediatrics,PCP,Pasadena,CA,IN
+1597643222,Dr. David Jones,Orthopedics,SPECIALIST,Anaheim,CA,IN
+1006061417,Dr. William Thomas,Orthopedics,SPECIALIST,San Diego,CA,OUT
+1165037749,Dr. William Lee,Family Medicine,PCP,Long Beach,CA,IN
+1710699207,Irvine Retail Pharmacy,Retail Pharmacy,PHARMACY,Pasadena,CA,IN
+1384491474,Long Beach Urgent Care,Urgent Care,FACILITY,Ontario,CA,IN
+1236182414,Anaheim Urgent Care,Urgent Care,FACILITY,Riverside,CA,IN
+1171122762,Pasadena Urgent Care,Urgent Care,FACILITY,Riverside,CA,IN
+1375168561,Dr. Linda Miller,Internal Medicine,PCP,San Diego,CA,IN
+1315223070,Dr. Michael Lee,Dermatology,SPECIALIST,Riverside,CA,IN
+1884428681,Ontario Urgent Care,Urgent Care,FACILITY,San Diego,CA,IN
+1478531560,Dr. Linda Nguyen,Dermatology,SPECIALIST,Riverside,CA,OUT
+1042817871,Dr. Nancy Hernandez,Cardiology,SPECIALIST,Pasadena,CA,OUT
+1414331133,Dr. David Jackson,Internal Medicine,PCP,San Diego,CA,IN
+1882732880,Ontario Urgent Care,Urgent Care,FACILITY,Irvine,CA,IN
+1478413078,Pasadena Urgent Care,Urgent Care,FACILITY,Long Beach,CA,IN
+1343933202,Dr. Thomas Williams,Cardiology,SPECIALIST,Long Beach,CA,IN
+1572525395,Long Beach Urgent Care,Urgent Care,FACILITY,San Diego,CA,IN
+1735948208,Dr. Susan Brown,Cardiology,SPECIALIST,Anaheim,CA,IN
+1694239754,Dr. Robert Kim,Neurology,SPECIALIST,San Diego,CA,IN
+1769731458,Irvine General Hospital,General Hospital,FACILITY,Long Beach,CA,IN
+1191117627,Dr. Wei Rodriguez,Family Medicine,PCP,Riverside,CA,IN
+1277721135,Dr. Susan Wilson,Cardiology,SPECIALIST,Pasadena,CA,IN
+1339736473,Dr. James Wilson,Neurology,SPECIALIST,San Diego,CA,IN
+1688722430,Dr. Lisa Lee,Family Medicine,PCP,Long Beach,CA,IN
+1048873346,San Diego Retail Pharmacy,Retail Pharmacy,PHARMACY,Ontario,CA,IN
+1113962171,Irvine Urgent Care,Urgent Care,FACILITY,Ontario,CA,IN
+1092884274,Irvine Retail Pharmacy,Retail Pharmacy,PHARMACY,Ontario,CA,OUT
+1424249629,Dr. Nancy Smith,Neurology,SPECIALIST,Pasadena,CA,IN
+1146438473,Dr. Lisa Wilson,Cardiology,SPECIALIST,Ontario,CA,IN
+1316730716,San Diego Urgent Care,Urgent Care,FACILITY,Anaheim,CA,IN
+1011972445,Dr. Sarah Jackson,Dermatology,SPECIALIST,Anaheim,CA,IN
+1614951911,Dr. Maria Wilson,Family Medicine,PCP,Riverside,CA,IN
+1327159637,Dr. Michael Kim,Internal Medicine,PCP,San Diego,CA,OUT
+1227350811,Dr. Susan Nguyen,Dermatology,SPECIALIST,Ontario,CA,IN
+1197560682,Dr. Linda Lee,Pediatrics,PCP,Ontario,CA,IN
+1194731649,Dr. Nancy Martin,Internal Medicine,PCP,Ontario,CA,IN
+1495279737,San Diego Urgent Care,Urgent Care,FACILITY,Riverside,CA,IN
+1269173782,Dr. Patricia Miller,Internal Medicine,PCP,San Diego,CA,IN
+1383474399,Dr. John Chen,Dermatology,SPECIALIST,San Diego,CA,IN
+1665200007,Dr. Robert Miller,Orthopedics,SPECIALIST,Irvine,CA,IN
+1661792646,Dr. Nancy Martinez,Dermatology,SPECIALIST,San Diego,CA,IN
+1608663326,Irvine Retail Pharmacy,Retail Pharmacy,PHARMACY,Ontario,CA,IN
+1181075299,Dr. James Hernandez,Neurology,SPECIALIST,Anaheim,CA,IN
+1297082704,Dr. Barbara Jones,Neurology,SPECIALIST,San Diego,CA,IN
+1496979657,Pasadena General Hospital,General Hospital,FACILITY,Irvine,CA,IN
+1592353117,Long Beach General Hospital,General Hospital,FACILITY,Anaheim,CA,IN
+1301309071,Dr. John Jackson,Internal Medicine,PCP,Anaheim,CA,IN
+1781067043,Dr. Robert Smith,Internal Medicine,PCP,Ontario,CA,IN
+1872568129,Dr. Carlos Martin,Family Medicine,PCP,Pasadena,CA,IN
+1039359410,Dr. Sarah Rodriguez,Cardiology,SPECIALIST,Riverside,CA,OUT
+1506917752,San Diego Urgent Care,Urgent Care,FACILITY,Ontario,CA,IN
+1239773681,Dr. Anh Martin,Neurology,SPECIALIST,San Diego,CA,OUT
+1498969054,Dr. Thomas Moore,Pediatrics,PCP,Long Beach,CA,IN
+1011372730,San Diego Urgent Care,Urgent Care,FACILITY,Anaheim,CA,IN
+1734612989,Anaheim Retail Pharmacy,Retail Pharmacy,PHARMACY,Ontario,CA,IN
+1170963770,Anaheim General Hospital,General Hospital,FACILITY,Riverside,CA,OUT
+1790187877,Dr. Lisa Taylor,Pediatrics,PCP,Irvine,CA,IN

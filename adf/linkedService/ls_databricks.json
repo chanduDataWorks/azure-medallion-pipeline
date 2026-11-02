@@ -1,0 +1,24 @@
+{
+    "name": "ls_databricks",
+    "properties": {
+        "description": "Databricks workspace. Auth: ADF managed identity - add the ADF identity as Contributor on the Databricks workspace resource.",
+        "annotations": [],
+        "type": "AzureDatabricks",
+        "typeProperties": {
+            "domain": "https://adb-0000000000000000.0.azuredatabricks.net",
+            "authentication": "MSI",
+            "workspaceResourceId": "/subscriptions/<subscription-id>/resourceGroups/rg-payer-claims-dev/providers/Microsoft.Databricks/workspaces/dbw-payer-claims-dev",
+            "newClusterNodeType": "Standard_DS3_v2",
+            "newClusterNumOfWorker": "1",
+            "newClusterVersion": "15.4.x-scala2.12",
+            "newClusterInitScripts": [],
+            "newClusterSparkConf": {
+                "fs.azure.account.auth.type.stpayerclaimscd01.dfs.core.windows.net": "OAuth",
+                "fs.azure.account.oauth.provider.type.stpayerclaimscd01.dfs.core.windows.net": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+                "fs.azure.account.oauth2.client.id.stpayerclaimscd01.dfs.core.windows.net": "{{secrets/kv-payer/sp-client-id}}",
+                "fs.azure.account.oauth2.client.secret.stpayerclaimscd01.dfs.core.windows.net": "{{secrets/kv-payer/sp-client-secret}}",
+                "fs.azure.account.oauth2.client.endpoint.stpayerclaimscd01.dfs.core.windows.net": "https://login.microsoftonline.com/<tenant-id>/oauth2/token"
+            }
+        }
+    }
+}

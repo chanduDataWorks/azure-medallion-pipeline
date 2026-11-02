@@ -1,0 +1,180 @@
+{
+    "name": "pl_ingest_bronze",
+    "properties": {
+        "description": "Metadata-driven ingestion: reads config/ingestion_config.json and copies every active source from landing (CSV) to bronze (Parquet, partitioned by ingest_date). Add a new feed by adding a config entry - no pipeline change.",
+        "activities": [
+            {
+                "name": "lkp_ingestion_config",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.00:10:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "JsonSource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "recursive": false,
+                            "enablePartitionDiscovery": false
+                        },
+                        "formatSettings": {
+                            "type": "JsonReadSettings"
+                        }
+                    },
+                    "dataset": {
+                        "referenceName": "ds_config_json",
+                        "type": "DatasetReference"
+                    },
+                    "firstRowOnly": true
+                }
+            },
+            {
+                "name": "flt_active_sources",
+                "type": "Filter",
+                "dependsOn": [
+                    {
+                        "activity": "lkp_ingestion_config",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('lkp_ingestion_config').output.firstRow.sources",
+                        "type": "Expression"
+                    },
+                    "condition": {
+                        "value": "@equals(item().is_active, true)",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "fe_sources",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "flt_active_sources",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('flt_active_sources').output.Value",
+                        "type": "Expression"
+                    },
+                    "isSequential": false,
+                    "batchCount": 3,
+                    "activities": [
+                        {
+                            "name": "cp_landing_to_bronze",
+                            "type": "Copy",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "0.01:00:00",
+                                "retry": 2,
+                                "retryIntervalInSeconds": 60,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [
+                                {
+                                    "name": "source",
+                                    "value": "@{item().source_name}"
+                                }
+                            ],
+                            "typeProperties": {
+                                "source": {
+                                    "type": "DelimitedTextSource",
+                                    "additionalColumns": [
+                                        {
+                                            "name": "_source_file",
+                                            "value": "$$FILEPATH"
+                                        },
+                                        {
+                                            "name": "_ingested_at",
+                                            "value": {
+                                                "value": "@utcNow()",
+                                                "type": "Expression"
+                                            }
+                                        }
+                                    ],
+                                    "storeSettings": {
+                                        "type": "AzureBlobFSReadSettings",
+                                        "recursive": true,
+                                        "wildcardFolderPath": {
+                                            "value": "@item().landing_folder",
+                                            "type": "Expression"
+                                        },
+                                        "wildcardFileName": {
+                                            "value": "@item().file_pattern",
+                                            "type": "Expression"
+                                        },
+                                        "enablePartitionDiscovery": false
+                                    },
+                                    "formatSettings": {
+                                        "type": "DelimitedTextReadSettings"
+                                    }
+                                },
+                                "sink": {
+                                    "type": "ParquetSink",
+                                    "storeSettings": {
+                                        "type": "AzureBlobFSWriteSettings"
+                                    },
+                                    "formatSettings": {
+                                        "type": "ParquetWriteSettings"
+                                    }
+                                },
+                                "enableStaging": false
+                            },
+                            "inputs": [
+                                {
+                                    "referenceName": "ds_landing_csv",
+                                    "type": "DatasetReference",
+                                    "parameters": {
+                                        "folder": {
+                                            "value": "@item().landing_folder",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "referenceName": "ds_bronze_parquet",
+                                    "type": "DatasetReference",
+                                    "parameters": {
+                                        "folder": {
+                                            "value": "@concat(item().bronze_folder, '/ingest_date=', pipeline().parameters.ingest_date)",
+                                            "type": "Expression"
+                                        },
+                                        "file_name": {
+                                            "value": "@concat(item().source_name, '.parquet')",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "ingest_date": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "payer_claims"
+        },
+        "annotations": []
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "ls_adls_gen2",
+    "properties": {
+        "description": "Data lake (landing, bronze, silver, gold, config). Auth: ADF system-assigned managed identity - grant it 'Storage Blob Data Contributor' on the storage account.",
+        "annotations": [],
+        "type": "AzureBlobFS",
+        "typeProperties": {
+            "url": "https://stpayerclaimscd01.dfs.core.windows.net/"
+        }
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "sources": [
+    {
+      "source_name": "members",
+      "landing_folder": "payer/members",
+      "file_pattern": "raw_members*.csv",
+      "bronze_folder": "payer/members",
+      "primary_key": "member_id",
+      "is_active": true
+    },
+    {
+      "source_name": "providers",
+      "landing_folder": "payer/providers",
+      "file_pattern": "raw_providers*.csv",
+      "bronze_folder": "payer/providers",
+      "primary_key": "provider_npi",
+      "is_active": true
+    },
+    {
+      "source_name": "claims",
+      "landing_folder": "payer/claims",
+      "file_pattern": "raw_claims*.csv",
+      "bronze_folder": "payer/claims",
+      "primary_key": "claim_id",
+      "is_active": true
+    }
+  ]
+}

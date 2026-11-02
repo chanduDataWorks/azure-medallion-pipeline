@@ -1,0 +1,184 @@
+{
+    "name": "pl_master_medallion",
+    "properties": {
+        "description": "Orchestrator: landing -> bronze (ADF copy) -> silver -> gold (Databricks notebooks). Pass ingest_date to re-run a past day; leave empty for today (UTC).",
+        "activities": [
+            {
+                "name": "set_run_date",
+                "type": "SetVariable",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "run_date",
+                    "value": {
+                        "value": "@if(empty(pipeline().parameters.ingest_date), formatDateTime(utcNow(), 'yyyy-MM-dd'), pipeline().parameters.ingest_date)",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "exec_ingest_bronze",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "set_run_date",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "pl_ingest_bronze",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "ingest_date": {
+                            "value": "@variables('run_date')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "nb_bronze_to_silver",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "exec_ingest_bronze",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Repos/<your-email>/azure-medallion-pipeline/databricks/01_bronze_to_silver",
+                    "baseParameters": {
+                        "storage_account": {
+                            "value": "@pipeline().parameters.storage_account",
+                            "type": "Expression"
+                        },
+                        "ingest_date": {
+                            "value": "@variables('run_date')",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "azure",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_databricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "nb_silver_to_gold",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "nb_bronze_to_silver",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Repos/<your-email>/azure-medallion-pipeline/databricks/02_silver_to_gold",
+                    "baseParameters": {
+                        "storage_account": {
+                            "value": "@pipeline().parameters.storage_account",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "azure",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_databricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "fail_if_silver_failed",
+                "type": "Fail",
+                "dependsOn": [
+                    {
+                        "activity": "nb_bronze_to_silver",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "message": {
+                        "value": "@concat('Bronze to silver failed for ', variables('run_date'), ': ', activity('nb_bronze_to_silver').error.message)",
+                        "type": "Expression"
+                    },
+                    "errorCode": "SILVER_LOAD_FAILED"
+                }
+            },
+            {
+                "name": "fail_if_gold_failed",
+                "type": "Fail",
+                "dependsOn": [
+                    {
+                        "activity": "nb_silver_to_gold",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "message": {
+                        "value": "@concat('Silver to gold failed for ', variables('run_date'), ': ', activity('nb_silver_to_gold').error.message)",
+                        "type": "Expression"
+                    },
+                    "errorCode": "GOLD_LOAD_FAILED"
+                }
+            }
+        ],
+        "parameters": {
+            "ingest_date": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "storage_account": {
+                "type": "string",
+                "defaultValue": "stpayerclaimscd01"
+            }
+        },
+        "variables": {
+            "run_date": {
+                "type": "String"
+            }
+        },
+        "folder": {
+            "name": "payer_claims"
+        },
+        "annotations": []
+    }
+}
