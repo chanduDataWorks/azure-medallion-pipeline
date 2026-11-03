@@ -62,7 +62,7 @@ azure-medallion-pipeline/
 │   ├── pipeline/               pl_master_medallion, pl_ingest_bronze
 │   └── trigger/                tr_daily_0200_ist
 ├── databricks/
-│   ├── 00_setup_free_edition.py  notebook (Free Edition only)
+│   ├── 00_setup_free_edition.py  notebook: creates the Unity Catalog schema + volume
 │   ├── 01_bronze_to_silver.py  notebook
 │   ├── 02_silver_to_gold.py    notebook
 │   ├── transforms.py           pure PySpark business logic
@@ -76,18 +76,45 @@ azure-medallion-pipeline/
 
 ---
 
+## Results
+
+The run below used an **Azure free-trial subscription**: ADF on Azure, notebooks on **Azure Databricks serverless compute** with Unity Catalog.
+
+**1. ADF: metadata-driven ingestion (landing → bronze)**
+
+![ADF pipeline](images/adf_pipeline.png)
+
+![ADF debug run: all activities succeeded](images/adf_debug_run.png)
+
+![Bronze Parquet files in ADLS](images/bronze_files.png)
+
+**2. Databricks: bronze → silver → gold**
+
+![Bronze files in the Unity Catalog volume](images/databricks_bronze_volume.png)
+
+![Notebook 01: 600 members, 60 providers, 6,000 claims merged into silver, 0 rejected](images/nb01_silver.png)
+
+![Notebook 02: plan-by-month KPIs and reconciliation](images/nb02_gold.png)
+
+![Silver and gold tables in Unity Catalog](images/unity_catalog_tables.png)
+
+The raw claims feed has 6,244 rows. Silver holds 6,000 after resubmitted duplicates are removed (latest `loaded_at` wins).
+
+---
+
 ## Two ways to run it
 
-| | Option A: full Azure | Option B: Azure + Databricks Free Edition |
+| | Option A: full Azure orchestration | Option B: the run shown above |
 | --- | --- | --- |
 | Landing → bronze | ADF copy pipeline | ADF copy pipeline (same) |
-| Bronze → silver → gold | ADF runs the notebooks on a Databricks job cluster | Notebooks run in Databricks Free Edition, reading the Parquet ADF produced |
+| Bronze → silver → gold | ADF runs both notebooks on a Databricks job cluster | Notebooks run on **serverless** compute (Azure Databricks or Databricks Free Edition) |
 | Silver / gold storage | Delta paths in ADLS | Unity Catalog managed Delta tables |
-| Cost | Pay-as-you-go subscription (Databricks needs it) | Azure free account only |
+| Notebook widget | `environment = azure` | `environment = free_edition` (Unity Catalog mode) |
+| Cost | Pay-as-you-go subscription | Free-trial credit, or ₹0 on Free Edition |
 
-The notebooks switch between the two with one widget, `environment` (`azure` or `free_edition`). `lake_paths.py` holds the locations for each.
+`lake_paths.py` holds where each layer lives in each mode. The business logic in `transforms.py` is identical in both.
 
-### Option B: Azure free account + Databricks Free Edition (the run shown in this repo)
+### Option B: step by step
 
 **Azure (ADF + storage)**
 
@@ -97,22 +124,25 @@ The notebooks switch between the two with one widget, `environment` (`azure` or 
 4. ADF Studio → *Manage → Git configuration* → this repo, root folder `/adf`.
 5. **Debug** `pl_ingest_bronze` with `ingest_date` = today (yyyy-MM-dd). Three Parquet files land in `bronze/payer/<entity>/ingest_date=.../`.
 
-**Databricks Free Edition**
+**Databricks (Azure Databricks serverless or Free Edition)**
 
 6. *Workspace → Create → Git folder* → this repo.
-7. Run `databricks/00_setup_free_edition` once: it creates schema `workspace.payer` and volume `lakehouse`.
-8. Download the three Parquet files from ADLS and upload them into the volume, keeping the `bronze/payer/<entity>/ingest_date=.../` layout.
-9. Run `01_bronze_to_silver`, then `02_silver_to_gold` (widget `environment = free_edition`). Notebook 02 ends with a row and amount reconciliation.
+7. Find your catalog: `SHOW CATALOGS` (Azure Databricks names it after the workspace, Free Edition calls it `workspace`). Set the **catalog** widget in each notebook to it.
+8. Run `databricks/00_setup_free_edition` once: it creates schema `<catalog>.payer` and volume `lakehouse`.
+9. Copy the three Parquet files from ADLS into the volume, keeping the `bronze/payer/<entity>/ingest_date=.../` layout.
+10. Run `01_bronze_to_silver` (leave `ingest_date` empty to pick the newest folder), then `02_silver_to_gold`. Notebook 02 ends with a row and amount reconciliation.
 
 *No ADF?* Notebook 00 can copy `sample_data/*.csv` straight into bronze (`load_sample_csv = yes`), and notebook 01 reads CSV or Parquet automatically.
 
-### Option A: full Azure
+**Next improvement:** replace the manual copy in step 9 with a Unity Catalog **external location** on the ADLS `bronze` container, so the notebooks read ADF's output directly.
+
+### Option A: full Azure orchestration
 
 | Resource | Name used in this repo | Notes |
 | --- | --- | --- |
 | Storage account | `stpayerclaimscd01` | ADLS Gen2. Containers: `landing`, `bronze`, `silver`, `gold`, `config` |
-| Data Factory | `adf-payer-claims-dev` | Managed identity: **Storage Blob Data Contributor** on storage, **Contributor** on the Databricks workspace |
-| Databricks workspace | `dbw-payer-claims-dev` | Needs a pay-as-you-go subscription |
+| Data Factory | `adf-payer-claims-cd01` | Managed identity: **Storage Blob Data Contributor** on storage, **Contributor** on the Databricks workspace |
+| Databricks workspace | `dbw-payer-claims-cd01` | Premium tier, pay-as-you-go subscription for job clusters |
 | Key Vault | `kv-payer-claims-dev` | Service principal secret, read through a Key Vault-backed secret scope `kv-payer` |
 
 1. Steps 1–5 above, plus containers `silver` and `gold`.
@@ -131,7 +161,7 @@ pytest -q
 ```
 
 ```
-.....                                                    [100%]
+.........                                                [100%]
 9 passed
 ```
 
