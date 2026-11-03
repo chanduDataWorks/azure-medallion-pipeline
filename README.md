@@ -92,12 +92,15 @@ The run below used an **Azure free-trial subscription**: ADF on Azure, notebooks
 
 ![Bronze files in the Unity Catalog volume](images/databricks_bronze_volume.png)
 
-![Notebook 01: 600 members, 60 providers, 6,000 claims merged into silver, 0 rejected](images/nb01_silver.png)
+![Notebook 01 re-run: 0 rejected; MERGE updated 600 members, 60 providers and 6,000 claims in place, no duplicates](images/nb01_silver.png)
 
-![Silver and gold tables in Unity Catalog](images/unity_catalog_tables1.png)
-![Silver and gold tables in Unity Catalog](images/unity_catalog_tables1.png)
+![Notebook 02: gold plan-by-month KPIs (member months, paid PMPM, denial rate)](images/unity_catalog_tables1.png)
+
+![Notebook 02: reconciliation passed, 6,000 claims and paid 3,930,644.97 match between silver and gold](images/unity_catalog_tables2.png)
 
 The raw claims feed has 6,244 rows. Silver holds 6,000 after resubmitted duplicates are removed (latest `loaded_at` wins).
+
+The notebook 01 output above is from a **second run** over the same bronze data. Every row was updated in place and nothing was inserted, which shows the MERGE load is safe to re-run.
 
 ---
 
